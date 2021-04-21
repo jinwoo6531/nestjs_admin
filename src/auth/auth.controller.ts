@@ -9,6 +9,7 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './models/register.dto';
 
+//test
 @Controller()
 export class AuthController {
   constructor(private userService: UserService) {}
