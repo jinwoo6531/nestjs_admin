@@ -1,3 +1,4 @@
+import { AuthGuard } from './auth.guard';
 import { UserService } from './../user/user.service';
 import {
   BadRequestException,
@@ -9,6 +10,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
@@ -16,7 +18,8 @@ import { RegisterDto } from './models/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 
-//test
+//entity의 Exclude와 연결되는 데코레이터로 비밀번호를 호출하고 싶지 않을 때 사용
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller()
 export class AuthController {
   constructor(
@@ -42,7 +45,7 @@ export class AuthController {
   async login(
     @Body('email') email: string,
     @Body('password') password: string,
-    @Res() response: Response,
+    @Res({ passthrough: true }) response: Response,
   ) {
     const user = await this.userService.findOne({ email });
 
@@ -61,8 +64,7 @@ export class AuthController {
     return user;
   }
 
-  //entity의 Exclude와 연결되는 데코레이터로 비밀번호를 호출하고 싶지 않을 때 사용
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(AuthGuard)
   @Get('user')
   async user(@Req() request: Request) {
     const cookie = request.cookies['jwt'];
@@ -70,5 +72,14 @@ export class AuthController {
     const data = await this.jwtService.verifyAsync(cookie);
 
     return this.userService.findOne({ id: data['id'] });
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('jwt');
+    return {
+      message: 'Success',
+    };
   }
 }
