@@ -2,16 +2,26 @@ import { UserService } from './../user/user.service';
 import {
   BadRequestException,
   Body,
+  ClassSerializerInterceptor,
   Controller,
+  Get,
   NotFoundException,
   Post,
+  Req,
+  Res,
+  UseInterceptors,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './models/register.dto';
+import { JwtService } from '@nestjs/jwt';
+import { Request, Response } from 'express';
 
 @Controller()
 export class AuthController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
   @Post('register')
   async register(@Body() body: RegisterDto) {
@@ -31,6 +41,7 @@ export class AuthController {
   async login(
     @Body('email') email: string,
     @Body('password') password: string,
+    @Res() response: Response,
   ) {
     const user = await this.userService.findOne({ email });
 
@@ -42,6 +53,21 @@ export class AuthController {
       throw new BadRequestException('Invalid credentials');
     }
 
+    const jwt = await this.jwtService.signAsync({ id: user.id });
+
+    response.cookie('jwt', jwt, { httpOnly: true });
+
     return user;
+  }
+
+  //entity의 Exclude와 연결되는 데코레이터로 비밀번호를 호출하고 싶지 않을 때 사용
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Get('user')
+  async user(@Req() request: Request) {
+    const cookie = request.cookies['jwt'];
+
+    const data = await this.jwtService.verifyAsync(cookie);
+
+    return this.userService.findOne({ id: data['id'] });
   }
 }
