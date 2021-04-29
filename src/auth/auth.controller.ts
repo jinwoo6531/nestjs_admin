@@ -41,7 +41,7 @@ export class AuthController {
       role: { id: 1 },
     });
   }
-
+  //로그인
   @Post('login')
   async login(
     @Body('email') email: string,
@@ -75,6 +75,7 @@ export class AuthController {
     return this.userService.findOne({ id: data['id'] });
   }
 
+  //로그아웃
   @UseGuards(AuthGuard)
   @Post('logout')
   async logout(@Res({ passthrough: true }) response: Response) {
