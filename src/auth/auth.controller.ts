@@ -76,7 +76,6 @@ export class AuthController {
   }
 
   //로그아웃
-  //useGuards 알아보기
   @UseGuards(AuthGuard)
   @Post('logout')
   async logout(@Res({ passthrough: true }) response: Response) {
