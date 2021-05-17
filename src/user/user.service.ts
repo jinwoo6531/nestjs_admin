@@ -12,7 +12,7 @@ export class UserService {
   async all(): Promise<User[]> {
     return await this.userRepository.find();
   }
-
+  //페이징
   async paginate(page = 1): Promise<any> {
     const take = 15;
 
