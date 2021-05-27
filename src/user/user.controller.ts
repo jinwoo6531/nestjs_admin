@@ -24,6 +24,7 @@ import { UserUpdateDto } from './models/user-update.dto';
 export class UserController {
   constructor(private userService: UserService) {}
 
+  //user page
   @Get()
   async all(@Query('page') page = 1): Promise<User[]> {
     return await this.userService.paginate(page);
