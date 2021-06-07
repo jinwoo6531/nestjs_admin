@@ -23,7 +23,7 @@ import { UserUpdateDto } from './models/user-update.dto';
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
-
+  //test
   @Get()
   async all(@Query('page') page = 1): Promise<User[]> {
     return await this.userService.paginate(page);
